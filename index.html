@@ -1,0 +1,29 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Predicción de Sequías - Quito</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <h1>Evaluación del Impacto del Cambio Climático en el Régimen Hidrológico</h1>
+    <p>Sube tus archivos .csv y visualiza los cambios en clima e hidrología.</p>
+
+    <input type="file" id="csvFile" accept=".csv" />
+    <button onclick="loadCSV()">Cargar CSV</button>
+
+    <div id="chartContainer">
+        <canvas id="chart"></canvas>
+    </div>
+
+    <div id="weatherInfo">
+        <h2>Datos actuales desde Gemini</h2>
+        <pre id="geminiData">Cargando...</pre>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>
