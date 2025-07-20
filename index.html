@@ -1,36 +1,532 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Predicción de Sequías - Quito</title>
-    <link rel="stylesheet" href="css/style.css" />
-</head>
-<body>
-    <h1>Evaluación del Impacto del Cambio Climático en el Régimen Hidrológico</h1>
-    <p>Sube tus archivos .csv y visualiza los cambios en clima e hidrología.</p>
-
-    <input type="file" id="csvFile" accept=".csv" />
-    <button onclick="loadCSV()">Cargar CSV</button>
-
-    <div id="chartContainer">
-        <canvas id="chart"></canvas>
-    </div>
-
-    <div id="weatherInfo">
-        <h2>Datos actuales desde Gemini</h2>
-        <pre id="geminiData">Cargando...</pre>
-    </div>
-
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="js/script.js"></script>
-<<<<<<< HEAD
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .loading-animation {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, .3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .hover-scale {
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        .hover-scale:hover {
+            transform: scale(1.02);
+        }
+        
+        .data-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .upload-zone {
+            border: 2px dashed #cbd5e1;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-zone:hover {
+            border-color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+        
+        .upload-zone.dragover {
+            border-color: #10b981;
+            background-color: rgba(16, 185, 129, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">
+                🌡️ Evaluación del Impacto Climático
+            </h1>
+            <p class="text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
+                Analiza datos hidrológicos y climáticos con visualizaciones interactivas y análisis inteligente
+            </p>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="max-w-4xl mx-auto mb-8">
+            <div class="data-card p-8">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
+                    📊 Cargar Datos CSV
+                </h2>
+                
+                <div class="upload-zone rounded-xl p-8 text-center mb-6" id="uploadZone">
+                    <div class="mb-4">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <input type="file" id="csvFile" accept=".csv" class="hidden" multiple />
+                    <p class="text-lg text-gray-600 mb-2">Arrastra archivos CSV aquí o</p>
+                    <button onclick="document.getElementById('csvFile').click()" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                        Seleccionar Archivo
+                    </button>
+                    <p class="text-sm text-gray-500 mt-2">Formatos soportados: .csv</p>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button id="loadBtn" onclick="loadCSV()" disabled 
+                            class="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover-scale disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span id="loadBtnText">Cargar y Analizar CSV</span>
+                        <span id="loadBtnSpinner" class="loading-animation ml-2 hidden"></span>
+                    </button>
+                    <button id="clearBtn" onclick="clearAll()" 
+                            class="px-8 py-3 bg-gray-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:bg-gray-600 transition-all duration-300">
+                        Limpiar Todo
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div id="chartSection" class="max-w-6xl mx-auto mb-8 hidden fade-in">
+            <div class="data-card p-8">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
+                    📈 Visualización de Datos
+                </h2>
+                <div class="relative">
+                    <canvas id="chart" class="w-full" style="max-height: 400px;"></canvas>
+                </div>
+                <div id="chartStats" class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <!-- Statistics will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Section -->
+        <div id="analysisSection" class="max-w-6xl mx-auto hidden fade-in">
+            <div class="data-card p-8">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
+                    🤖 Análisis Inteligente
+                </h2>
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                    <div id="analysisContent">
+                        <div class="flex items-center justify-center">
+                            <div class="loading-animation mr-3"></div>
+                            <span class="text-blue-600">Analizando datos con IA...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="statusMessages" class="fixed bottom-4 right-4 z-50">
+            <!-- Status messages will appear here -->
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script type="module">
-  import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
-  window.GoogleGenerativeAI = GoogleGenerativeAI;
-</script>
-=======
->>>>>>> 36be63ed08d5ebb5472e7cf9b58149e79b086645
+        import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+        window.GoogleGenerativeAI = GoogleGenerativeAI;
+    </script>
+
+    <script>
+        let currentChart = null;
+        let csvData = [];
+
+        // Initialize drag and drop functionality
+        function initializeDragDrop() {
+            const uploadZone = document.getElementById('uploadZone');
+            const fileInput = document.getElementById('csvFile');
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadZone.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadZone.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadZone.addEventListener(eventName, unhighlight, false);
+            });
+
+            uploadZone.addEventListener('drop', handleDrop, false);
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            function highlight(e) {
+                uploadZone.classList.add('dragover');
+            }
+
+            function unhighlight(e) {
+                uploadZone.classList.remove('dragover');
+            }
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                fileInput.files = files;
+                updateLoadButton();
+            }
+
+            fileInput.addEventListener('change', updateLoadButton);
+        }
+
+        function updateLoadButton() {
+            const fileInput = document.getElementById('csvFile');
+            const loadBtn = document.getElementById('loadBtn');
+            loadBtn.disabled = !fileInput.files.length;
+        }
+
+        function showStatus(message, type = 'info') {
+            const container = document.getElementById('statusMessages');
+            const statusDiv = document.createElement('div');
+            
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-yellow-500',
+                info: 'bg-blue-500'
+            };
+
+            statusDiv.className = `${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg mb-2 transform translate-x-full transition-transform duration-300`;
+            statusDiv.textContent = message;
+            
+            container.appendChild(statusDiv);
+            
+            // Animate in
+            setTimeout(() => {
+                statusDiv.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                statusDiv.style.transform = 'translateX(full)';
+                setTimeout(() => container.removeChild(statusDiv), 300);
+            }, 5000);
+        }
+
+        async function callGemini(promptText, csvContent) {
+            const API_KEY = 'AIzaSyBy_NdlEFj_4NZxdyHnT302YagCwkF-ICs';
+            
+            if (!window.GoogleGenerativeAI) {
+                throw new Error("La biblioteca GoogleGenerativeAI no está disponible");
+            }
+
+            try {
+                const genAI = new window.GoogleGenerativeAI(API_KEY);
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+                const enhancedPrompt = `
+                Como experto en análisis de datos climáticos e hidrológicos, analiza los siguientes datos CSV:
+
+                ${csvContent}
+
+                Por favor proporciona:
+                1. **Resumen ejecutivo**: Principales hallazgos
+                2. **Tendencias identificadas**: Patrones temporales o espaciales
+                3. **Anomalías detectadas**: Valores atípicos o eventos extremos
+                4. **Interpretación climatológica**: Posibles causas y implicaciones
+                5. **Recomendaciones**: Acciones sugeridas basadas en los datos
+
+                Enfócate en aspectos relacionados con:
+                - Regímenes hidrológicos
+                - Variabilidad climática
+                - Riesgos de sequía
+                - Impactos del cambio climático
+
+                Presenta tu análisis de manera estructurada y profesional.
+                `;
+
+                const result = await model.generateContent(enhancedPrompt);
+                const response = await result.response;
+                return response.text();
+            } catch (error) {
+                console.error("Error al llamar a Gemini:", error);
+                throw error;
+            }
+        }
+
+        function calculateStatistics(data) {
+            if (!data.length) return {};
+            
+            const values = data.map(d => d.value).filter(v => !isNaN(v));
+            const sum = values.reduce((a, b) => a + b, 0);
+            const mean = sum / values.length;
+            const sortedValues = [...values].sort((a, b) => a - b);
+            const median = sortedValues.length % 2 === 0 
+                ? (sortedValues[sortedValues.length / 2 - 1] + sortedValues[sortedValues.length / 2]) / 2
+                : sortedValues[Math.floor(sortedValues.length / 2)];
+            
+            return {
+                count: values.length,
+                mean: mean.toFixed(2),
+                median: median.toFixed(2),
+                min: Math.min(...values).toFixed(2),
+                max: Math.max(...values).toFixed(2),
+                range: (Math.max(...values) - Math.min(...values)).toFixed(2)
+            };
+        }
+
+        function displayStatistics(stats) {
+            const container = document.getElementById('chartStats');
+            container.innerHTML = `
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <div class="text-2xl font-bold text-blue-600">${stats.count}</div>
+                    <div class="text-sm text-gray-600">Registros</div>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <div class="text-2xl font-bold text-green-600">${stats.mean}</div>
+                    <div class="text-sm text-gray-600">Promedio</div>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <div class="text-2xl font-bold text-purple-600">${stats.median}</div>
+                    <div class="text-sm text-gray-600">Mediana</div>
+                </div>
+                <div class="bg-orange-50 p-4 rounded-lg">
+                    <div class="text-2xl font-bold text-orange-600">${stats.range}</div>
+                    <div class="text-sm text-gray-600">Rango</div>
+                </div>
+            `;
+        }
+
+        async function loadCSV() {
+            const fileInput = document.getElementById('csvFile');
+            const loadBtn = document.getElementById('loadBtn');
+            const loadBtnText = document.getElementById('loadBtnText');
+            const loadBtnSpinner = document.getElementById('loadBtnSpinner');
+
+            if (!fileInput.files.length) {
+                showStatus('Por favor, selecciona un archivo CSV', 'warning');
+                return;
+            }
+
+            // Show loading state
+            loadBtn.disabled = true;
+            loadBtnText.textContent = 'Procesando...';
+            loadBtnSpinner.classList.remove('hidden');
+
+            try {
+                const file = fileInput.files[0];
+                const text = await file.text();
+                
+                // Parse CSV
+                const rows = text.trim().split('\n');
+                if (rows.length < 2) {
+                    throw new Error('El archivo CSV debe tener al menos 2 filas (encabezado + datos)');
+                }
+
+                const headers = rows[0].split(',').map(h => h.trim());
+                csvData = [];
+                let csvContentForGemini = `Encabezados: ${headers.join(', ')}\n\n`;
+
+                for (let i = 1; i < rows.length; i++) {
+                    const cols = rows[i].split(',').map(c => c.trim());
+                    if (cols.length >= 2 && cols[1] && !isNaN(parseFloat(cols[1]))) {
+                        const dataPoint = {
+                            label: cols[0],
+                            value: parseFloat(cols[1]),
+                            row: cols
+                        };
+                        csvData.push(dataPoint);
+                        csvContentForGemini += `${cols.join(', ')}\n`;
+                    }
+                }
+
+                if (csvData.length === 0) {
+                    throw new Error('No se encontraron datos válidos en el archivo CSV');
+                }
+
+                // Create chart
+                await createChart();
+                
+                // Calculate and display statistics
+                const stats = calculateStatistics(csvData);
+                displayStatistics(stats);
+                
+                // Show chart section
+                document.getElementById('chartSection').classList.remove('hidden');
+                
+                // Show analysis section and start AI analysis
+                document.getElementById('analysisSection').classList.remove('hidden');
+                
+                // Call Gemini for analysis
+                try {
+                    const analysis = await callGemini('Analizar datos CSV', csvContentForGemini);
+                    document.getElementById('analysisContent').innerHTML = `
+                        <div class="prose max-w-none">
+                            <div class="whitespace-pre-wrap text-gray-700">${analysis}</div>
+                        </div>
+                    `;
+                } catch (error) {
+                    document.getElementById('analysisContent').innerHTML = `
+                        <div class="text-red-600">
+                            <strong>Error en el análisis de IA:</strong> ${error.message}
+                            <br><small>Los datos se han cargado correctamente, pero no se pudo obtener el análisis automático.</small>
+                        </div>
+                    `;
+                }
+
+                showStatus('Archivo CSV cargado exitosamente', 'success');
+                
+            } catch (error) {
+                console.error('Error loading CSV:', error);
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                // Reset loading state
+                loadBtn.disabled = false;
+                loadBtnText.textContent = 'Cargar y Analizar CSV';
+                loadBtnSpinner.classList.add('hidden');
+            }
+        }
+
+        async function createChart() {
+            if (currentChart) {
+                currentChart.destroy();
+            }
+
+            const ctx = document.getElementById('chart').getContext('2d');
+            
+            currentChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: csvData.map(d => d.label),
+                    datasets: [{
+                        label: 'Valores',
+                        data: csvData.map(d => d.value),
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Análisis de Datos Climáticos e Hidrológicos',
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            },
+                            padding: 20
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Período/Muestra'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Valores'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        }
+
+        function clearAll() {
+            // Clear file input
+            document.getElementById('csvFile').value = '';
+            
+            // Clear data
+            csvData = [];
+            
+            // Hide sections
+            document.getElementById('chartSection').classList.add('hidden');
+            document.getElementById('analysisSection').classList.add('hidden');
+            
+            // Destroy chart
+            if (currentChart) {
+                currentChart.destroy();
+                currentChart = null;
+            }
+            
+            // Update load button
+            updateLoadButton();
+            
+            showStatus('Datos limpiados correctamente', 'info');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeDragDrop();
+            updateLoadButton();
+        });
+    </script>
 </body>
 </html>

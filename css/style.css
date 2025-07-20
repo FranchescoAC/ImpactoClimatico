@@ -1,13 +1,79 @@
-
 body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    background: #f5f5f5;
-}
-h1 {
-    color: #2a2a2a;
-}
-#chartContainer {
-    max-width: 800px;
-    margin-top: 20px;
-}
+            font-family: Arial, sans-serif; /* Usando la fuente del usuario como principal */
+            margin: 20px; /* Margen del usuario */
+            background: #f5f5f5; /* Color de fondo del usuario */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: calc(100vh - 40px); /* Ajuste para el margin del body */
+        }
+        h1 {
+            color: #2a2a2a; /* Color del usuario para h1 */
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 2.25rem; /* Tailwind text-3xl */
+            font-weight: 700; /* Tailwind font-bold */
+        }
+        h2 {
+            color: #1e293b; /* Mantengo un color oscuro para h2 */
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 1.5rem; /* Tailwind text-2xl */
+            font-weight: 600; /* Tailwind font-semibold */
+        }
+        p {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #334155; /* Color de texto principal */
+            font-size: 1.125rem; /* Tailwind text-lg */
+        }
+        #chartContainer {
+            max-width: 800px; /* Max-width del usuario */
+            margin-top: 20px; /* Margin-top del usuario */
+            width: 90%; /* Para responsividad */
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        canvas {
+            max-height: 400px; /* Altura máxima para el gráfico */
+        }
+        #weatherInfo {
+            width: 90%;
+            max-width: 800px; /* Alineado con chartContainer */
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px; /* Espacio entre secciones */
+        }
+        pre {
+            white-space: pre-wrap; /* Permite que el texto se ajuste */
+            word-wrap: break-word; /* Rompe palabras largas */
+            background-color: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            max-height: 300px; /* Limita la altura del área de texto */
+            overflow-y: auto; /* Agrega scroll si el contenido es muy largo */
+        }
+        input[type="file"] {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background-color: #ffffff;
+        }
+        button {
+            background-color: #3b82f6; /* Azul de Tailwind */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #2563eb; /* Azul más oscuro al pasar el ratón */
+        }

@@ -1,3 +1,4 @@
+import { GoogleGenAI } from "@google/genai";
 async function callGemini(promptText) {
     const geminiDataDiv = document.getElementById("geminiData");
     geminiDataDiv.textContent = "Preguntando a Gemini..."; // Mensaje de carga
@@ -6,7 +7,7 @@ async function callGemini(promptText) {
     // Reemplaza 'TU_CLAVE_API_DE_GEMINI' con tu clave API REAL.
     // NUNCA HAGAS ESTO EN CÓDIGO DE PRODUCCIÓN.
     const API_KEY = 'AIzaSyDvlXTTMAIPVeHnED9ZQahMyBG9KYbxZPk'; 
-
+const ai = new GoogleGenAI({});
     if (!window.GoogleGenerativeAI) {
         geminiDataDiv.textContent = "Error: Biblioteca GoogleGenerativeAI no cargada.";
         console.error("La biblioteca GoogleGenerativeAI no está disponible.");
