@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 async function callGemini(promptText) {
     const geminiDataDiv = document.getElementById("geminiData");
     geminiDataDiv.textContent = "Preguntando a Gemini..."; // Mensaje de carga
@@ -30,9 +29,6 @@ async function callGemini(promptText) {
 }
 
 // --- Tu código existente para cargar el CSV ---
-=======
-
->>>>>>> 36be63ed08d5ebb5472e7cf9b58149e79b086645
 async function loadCSV() {
     const fileInput = document.getElementById('csvFile');
     const file = fileInput.files[0];
@@ -45,21 +41,15 @@ async function loadCSV() {
     const rows = text.split('\n').slice(1);
     const labels = [];
     const data = [];
-<<<<<<< HEAD
     let csvContentForGemini = "Aquí están los datos de un archivo CSV:\n";
     csvContentForGemini += "Etiqueta,Valor\n"; // Encabezado para Gemini
-=======
->>>>>>> 36be63ed08d5ebb5472e7cf9b58149e79b086645
 
     rows.forEach(row => {
         const cols = row.split(',');
         if (cols.length >= 2 && cols[1]) {
             labels.push(cols[0]);
             data.push(parseFloat(cols[1]));
-<<<<<<< HEAD
             csvContentForGemini += `${cols[0]},${cols[1]}\n`; // Añade al contenido para Gemini
-=======
->>>>>>> 36be63ed08d5ebb5472e7cf9b58149e79b086645
         }
     });
 
@@ -76,7 +66,6 @@ async function loadCSV() {
             }]
         }
     });
-<<<<<<< HEAD
 
     // --- Llamar a Gemini después de cargar el CSV ---
     const prompt = `Analiza los siguientes datos CSV y dame algunas conclusiones o un resumen:
@@ -86,13 +75,3 @@ ${csvContentForGemini}`;
 
 // Ya no necesitas fetchGeminiWeather si usas loadCSV para iniciar la llamada a Gemini
 // window.onload = fetchGeminiWeather; // Esta línea puede ser eliminada
-=======
-}
-
-async function fetchGeminiWeather() {
-    const geminiInfo = `Este es un ejemplo. Debes reemplazarlo por una llamada real a una API.`;
-    document.getElementById("geminiData").textContent = geminiInfo;
-}
-
-window.onload = fetchGeminiWeather;
->>>>>>> 36be63ed08d5ebb5472e7cf9b58149e79b086645
