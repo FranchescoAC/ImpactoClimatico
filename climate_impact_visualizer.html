@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Impacto del Cambio Climático en Quito</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"/>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    canvas { max-width: 700px; margin-bottom: 40px; }
+    #map { height: 400px; margin-top: 30px; }
+    input[type="file"] { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Evaluación del Impacto del Cambio Climático en el Régimen Hidrológico</h1>
+  <p>Sube un archivo CSV con columnas: <code>fecha, temperatura, precipitacion, caudal</code>.</p>
+  <input type="file" id="csvFile" accept=".csv" />
+  <canvas id="tempChart"></canvas>
+  <canvas id="rainChart"></canvas>
+  <canvas id="flowChart"></canvas>
+  <div id="map"></div>
+
+  <script>
+    const tempCtx = document.getElementById('tempChart').getContext('2d');
+    const rainCtx = document.getElementById('rainChart').getContext('2d');
+    const flowCtx = document.getElementById('flowChart').getContext('2d');
+
+    document.getElementById('csvFile').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      Papa.parse(file, {
+        header: true,
+        download: true,
+        skipEmptyLines: true,
+        complete: function (results) {
+          const rows = results.data;
+
+          const fechas = rows.map(row => row.fecha);
+          const temperaturas = rows.map(row => parseFloat(row.temperatura));
+          const lluvias = rows.map(row => parseFloat(row.precipitacion));
+          const caudales = rows.map(row => parseFloat(row.caudal));
+
+          new Chart(tempCtx, {
+            type: 'line',
+            data: {
+              labels: fechas,
+              datasets: [{
+                label: 'Temperatura (°C)',
+                data: temperaturas,
+                borderColor: 'orange',
+                tension: 0.1
+              }]
+            }
+          });
+
+          new Chart(rainCtx, {
+            type: 'bar',
+            data: {
+              labels: fechas,
+              datasets: [{
+                label: 'Precipitación (mm)',
+                data: lluvias,
+                backgroundColor: 'blue'
+              }]
+            }
+          });
+
+          new Chart(flowCtx, {
+            type: 'line',
+            data: {
+              labels: fechas,
+              datasets: [{
+                label: 'Caudal (m³/s)',
+                data: caudales,
+                borderColor: 'green',
+                tension: 0.1
+              }]
+            }
+          });
+        }
+      });
+    });
+
+    // Mapa con zonas hipotéticas de sequía
+    const map = L.map('map').setView([-0.22985, -78.52495], 11); // Quito
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    const zonas = [
+      { nombre: "Zona Norte", coords: [-0.1, -78.5], riesgo: "Alto" },
+      { nombre: "Zona Sur", coords: [-0.3, -78.55], riesgo: "Moderado" },
+      { nombre: "Zona Centro", coords: [-0.2, -78.52], riesgo: "Bajo" }
+    ];
+
+    zonas.forEach(z => {
+      L.marker(z.coords).addTo(map)
+        .bindPopup(`<strong>${z.nombre}</strong><br>Riesgo de sequía: ${z.riesgo}`);
+    });
+
+    // Llamada ficticia a Gemini para mostrar cómo se incluiría
+    async function fetchClimaGemini() {
+      const dummyResponse = await fetch("https://clima-api.fake-gemini.io/quito");
+      const datos = await dummyResponse.json();
+      console.log("Datos de Gemini:", datos);
+      // Mostrar comparación con datos históricos en tabla (por hacer)
+    }
+
+    // fetchClimaGemini(); // Activar si tienes clave y endpoint real
+  </script>
+</body>
+</html>
